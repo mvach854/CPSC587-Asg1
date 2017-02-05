@@ -41,7 +41,7 @@ Vec3f ParametricCurve::getCurvePoint(float distAlongTrack) {
 								 (3 * (1 - distBez) * pow(distBez, 2) * P3) +
 								 (pow(distBez, 3) * P4);
 
- /*	std::cout << "P1: " << P1 << "\n";
+/* 	std::cout << "P1: " << P1 << "\n";
 	std::cout << "P2: " << P2 << "\n";
 	std::cout << "P3: " << P3 << "\n";
 	std::cout << "P4: " << P4 << "\n";
@@ -51,7 +51,7 @@ Vec3f ParametricCurve::getCurvePoint(float distAlongTrack) {
 	return output;
 }
 
-int ParametricCurve::getTotalArcLength() {
+float ParametricCurve::getTotalArcLength() {
 	float deltaU = 0.001f;
 	float L = 0.f; // Total arc length
 	float u = 0.f;
@@ -70,4 +70,16 @@ int ParametricCurve::getTotalArcLength() {
 		p = getCurvePoint(u);
 	}
 	return L;
+}
+
+float ParametricCurve::getVelocity(float currHeight) {
+	float v = 0.f;
+
+	return v;
+}
+
+Vec3f ParametricCurve::getPosition(float deltaS) {
+	Vec3f pos;
+
+	return pos;
 }

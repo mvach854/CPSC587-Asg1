@@ -150,13 +150,15 @@ void displayFunc() {
   glDrawArrays(GL_LINE_LOOP, 0, numPointsParametric); // Number of defined vertices for track
 }
 
-void animateQuad(float t) {
-  M = RotateAboutYMatrix(100 * t);
+void animateQuad(Vec3f position) {
+//  M = RotateAboutYMatrix(100 * t);
+  M = IdentityMatrix();
 
-  float s = (std::sin(t) + 1.f) / 2.f;
-  float x = (1 - s) * (10) + s * (-10);
+//  float s = (std::sin(t) + 1.f) / 2.f;
+//  float x = (1 - s) * (10) + s * (-10);
 
-  M = TranslateMatrix(x, 0, 0) * M;
+//  M = TranslateMatrix(x, 0, 0) * M;
+  M = TranslateMatrix(position.x(), position.y(), position.z()) * M;
 
   setupModelViewProjectionTransform();
   reloadMVPUniform();
@@ -202,14 +204,14 @@ void loadLineGeometryToGPU() {
   // u -> [0,1]
   curve.setCurve(controlPoints);
 
-  int L = curve.getTotalArcLength();
+  float L = curve.getTotalArcLength();
   // TODO: Remove print function
-  //  printf("L = %d\n", L);
+  //  printf("L = %f\n", L);
 
   std::vector<Vec3f> curvePoints;
   float deltaU = 0.0001;
   for (float u = 0.f; u <= 1.f; u+= deltaU) {
-    curvePoints.push_back(curve.getCurvePoint(u));
+  //  curvePoints.push_back(curve.getCurvePoint(u));
   }
 
   numPointsParametric = curvePoints.size();
@@ -383,15 +385,20 @@ int main(int argc, char **argv) {
   // Instantiate objects
  // curve = new ParametricCurve::ParametricCurve();
 
-  float t = 0;
-  float dt = 0.01;
+  float deltaS = 0.f;
+  float deltaT = 0.01f;
+  float v = 0.f;
+  Vec3f currentPos;
 
   while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
          !glfwWindowShouldClose(window)) {
 
     if (g_play) {
-      t += dt;
-      animateQuad(t);
+//      t += dt;
+      v = curve.getVelocity(currentPos.y());
+      deltaS = v * deltaT;
+      currentPos = curve.getPosition(deltaS);
+      animateQuad(currentPos);
     }
 
     displayFunc();

@@ -17,11 +17,16 @@ public:
 	ParametricCurve();
 	void setCurve(std::vector<Vec3f> contPoints);
 	Vec3f getCurvePoint(float distAlongTrack);
-	int getTotalArcLength();
+	float getVelocity(float currHeight);
+	Vec3f getPosition(float deltaS);
+	float getTotalArcLength();
 
 private:
 	std::vector<Vec3f> initialCurve;
 	float numBezierCurves;
+	float arcLength[];
+
+//	float getTotalArcLength();
 };
 
 #endif // PARAMETRIC_CURVE_H
