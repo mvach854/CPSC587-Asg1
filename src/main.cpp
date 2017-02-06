@@ -151,8 +151,9 @@ void displayFunc() {
 }
 
 void animateQuad(Vec3f position) {
-//  M = RotateAboutYMatrix(100 * t);
   M = IdentityMatrix();
+
+//  M = RotateAboutYMatrix(100 * position.y());
 
 //  float s = (std::sin(t) + 1.f) / 2.f;
 //  float x = (1 - s) * (10) + s * (-10);
@@ -198,20 +199,14 @@ void loadLineGeometryToGPU() {
   controlPoints.push_back(Vec3f(-10, -5, 0));
   controlPoints.push_back(Vec3f(-5, -5, 0));
 
-  int numVerts = 7;
-
   // C(u) is your parametric curve
   // u -> [0,1]
   curve.setCurve(controlPoints);
 
-  float L = curve.getTotalArcLength();
-  // TODO: Remove print function
-  //  printf("L = %f\n", L);
-
   std::vector<Vec3f> curvePoints;
   float deltaU = 0.0001;
   for (float u = 0.f; u <= 1.f; u+= deltaU) {
-  //  curvePoints.push_back(curve.getCurvePoint(u));
+    curvePoints.push_back(curve.getCurvePoint(u));
   }
 
   numPointsParametric = curvePoints.size();
@@ -385,19 +380,26 @@ int main(int argc, char **argv) {
   // Instantiate objects
  // curve = new ParametricCurve::ParametricCurve();
 
-  float deltaS = 0.f;
-  float deltaT = 0.01f;
-  float v = 0.f;
-  Vec3f currentPos;
+  float deltaS = 0.f; // this deltaS is the distance we want to travel along the curve
+  float deltaT = 0.1f; // change in time
+  float v = 0.f; // velocity, as determined by physics
+  Vec3f currentPos = curve.getPosition(deltaS);
 
   while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
          !glfwWindowShouldClose(window)) {
 
+  //         for (int i= 0; i < 100; i++) {
+  //           Vec3f test = curve.getPosition(i);
+  //         }
+
+
     if (g_play) {
-//      t += dt;
       v = curve.getVelocity(currentPos.y());
-      deltaS = v * deltaT;
+      deltaS += v * deltaT;
       currentPos = curve.getPosition(deltaS);
+      printf(" veloc: %f\n", v);
+      printf(" deltaS: %f\n", deltaS);
+      std::cout << "curr pos: " << currentPos << std::endl;
       animateQuad(currentPos);
     }
 

@@ -18,15 +18,21 @@ public:
 	void setCurve(std::vector<Vec3f> contPoints);
 	Vec3f getCurvePoint(float distAlongTrack);
 	float getVelocity(float currHeight);
-	Vec3f getPosition(float deltaS);
-	float getTotalArcLength();
+	Vec3f getPosition(int deltaS);
 
 private:
 	std::vector<Vec3f> initialCurve;
 	float numBezierCurves;
-	float arcLength[];
+	int N;
+	float uValues[100]; // 100 represents N values that the curve will be split into
+	float totalArcLength;
+	float deltaU;
+	float highestPoint;
 
-//	float getTotalArcLength();
+	void arcLengthParameterization();
+	float getTotalArcLength();
+	float bisectionRefinement(float ul, float uh, float deltaS, float currS, Vec3f currPos);
+	void setHighestPoint();
 };
 
 #endif // PARAMETRIC_CURVE_H

@@ -5,12 +5,20 @@
 
 #include "ParametricCurve.h"
 
-ParametricCurve::ParametricCurve() {};
+ParametricCurve::ParametricCurve() {
+	N = 100;
+	deltaU = 0.0001f;
+};
 
 void ParametricCurve::setCurve(std::vector<Vec3f> contPoints) {
 	initialCurve = contPoints;
 	numBezierCurves = floor(initialCurve.size()/3); // Assuming that the input control points are an
-}																					 // even multiple of 3 which would make a close loop
+																					 				// even multiple of 3 which would make a close loop
+	totalArcLength = getTotalArcLength();
+	printf("arc length is: %f\n", totalArcLength);
+	arcLengthParameterization();
+	setHighestPoint();
+}
 
 Vec3f ParametricCurve::getCurvePoint(float distAlongTrack) {
 	float bezierSeg = floor(numBezierCurves * distAlongTrack); // Finds which Bexier segment the point is in
@@ -52,7 +60,6 @@ Vec3f ParametricCurve::getCurvePoint(float distAlongTrack) {
 }
 
 float ParametricCurve::getTotalArcLength() {
-	float deltaU = 0.001f;
 	float L = 0.f; // Total arc length
 	float u = 0.f;
 	Vec3f p = getCurvePoint(u); // Point holder
@@ -72,14 +79,76 @@ float ParametricCurve::getTotalArcLength() {
 	return L;
 }
 
+void ParametricCurve::arcLengthParameterization() {
+	int i = 0;
+	float deltaS = totalArcLength/N;
+	printf("deltaS amount: %f\n", deltaS);
+	float currS = 0;
+	float uh = 0;
+	float ul = 0;
+	Vec3f currPos;
+
+	while (uh <= 1) {
+		currPos = getCurvePoint(uh);
+		uh = uh + deltaU;
+		if ((currS + currPos.distance(getCurvePoint(uh))) > deltaS) {
+			ul = uh - deltaU;
+			uValues[i] = bisectionRefinement(ul, uh, deltaS, currS, currPos);
+		  uh = uValues[i];
+			i = i + 1;
+			currS = 0;
+		}
+		else {
+			currS = currS + currPos.distance(getCurvePoint(uh));
+		}
+	}
+}
+
+float ParametricCurve::bisectionRefinement(float ul, float uh, float deltaS, float currS, Vec3f currPos) {
+	int i = 0;
+	float um = 0.f;
+	Vec3f posm;
+	float deltaSm;
+
+	while (i <= 5) {
+			um = ((ul + uh)/2);
+			posm = getCurvePoint(um);
+			deltaSm = currS + currPos.distance(posm);
+			if ((abs(deltaSm - deltaS) < 0.001) || (((uh - uh)/2) < 0.001)) {
+				return um;
+			}
+			if (deltaSm < deltaS) {
+				ul = um;
+			}
+			else {
+				uh = um;
+			}
+	}
+}
+
+void ParametricCurve::setHighestPoint() {
+	float i = 0.f;
+	highestPoint = getCurvePoint(i).y();
+	while (i <= 1.f) {
+		if (getCurvePoint(i).y() > highestPoint) {
+			highestPoint = getCurvePoint(i).y();
+		}
+		i = i + 0.001f;
+	}
+
+	printf("highestpoint is : %f\n", highestPoint);
+}
+
 float ParametricCurve::getVelocity(float currHeight) {
 	float v = 0.f;
-
+	v = sqrt(2.f * 9.81f * (highestPoint - currHeight));
 	return v;
 }
 
-Vec3f ParametricCurve::getPosition(float deltaS) {
-	Vec3f pos;
+Vec3f ParametricCurve::getPosition(int deltaS) {
+//	Vec3f pos;
 
-	return pos;
+//std:: cout << "position along curve " << deltaS << " : " << uValues[deltaS] << std::endl;
+//	std::cout << "test position: " << getCurvePoint(uValues[deltaS]) << std::endl;
+	return getCurvePoint(uValues[deltaS%N]);
 }
