@@ -31,6 +31,7 @@
 
 #include "ShaderTools.h"
 #include "Vec3f.h"
+#include "Vec3f_FileIO.h"
 #include "Mat4f.h"
 #include "OpenGLMatrixTools.h"
 #include "Camera.h"
@@ -83,11 +84,14 @@ float WIN_FOV = 60;
 float WIN_NEAR = 0.01;
 float WIN_FAR = 1000;
 
-// Object for curve
+// Object for
 ParametricCurve curve;
 
-// Size of parametric curve
+// Number of parametric points
 int numPointsParametric;
+
+// Control points container
+VectorContainerVec3f controlPoints;
 
 //==================== FUNCTION DECLARATIONS ====================//
 void displayFunc();
@@ -185,22 +189,20 @@ void loadQuadGeometryToGPU() {
 void loadLineGeometryToGPU() {
   // Just basic layout of floats, for a quad
   // 3 floats per vertex, 4 vertices
-  std::vector<Vec3f> controlPoints;
-  controlPoints.push_back(Vec3f(0, 0, 0));
-  controlPoints.push_back(Vec3f(5, 5, 0));
-  controlPoints.push_back(Vec3f(10, 5, 0));
-  controlPoints.push_back(Vec3f(10, 0, 0));
-  controlPoints.push_back(Vec3f(10, -5, 0));
-  controlPoints.push_back(Vec3f(5, -5, 0));
-  controlPoints.push_back(Vec3f(0, 0, 5));
-  controlPoints.push_back(Vec3f(-5, 5, 10));
-  controlPoints.push_back(Vec3f(-10, 5, 0));
-  controlPoints.push_back(Vec3f(-10, 0, 0));
-  controlPoints.push_back(Vec3f(-10, -5, 0));
-  controlPoints.push_back(Vec3f(-5, -5, 0));
+  //std::vector<Vec3f> controlPoints;
+  // controlPoints.push_back(Vec3f(0, 0, 0));
+  // controlPoints.push_back(Vec3f(5, 5, 0));
+  // controlPoints.push_back(Vec3f(10, 5, 0));
+  // controlPoints.push_back(Vec3f(10, 0, 0));
+  // controlPoints.push_back(Vec3f(10, -5, 0));
+  // controlPoints.push_back(Vec3f(5, -5, 0));
+  // controlPoints.push_back(Vec3f(0, 0, 5));
+  // controlPoints.push_back(Vec3f(-5, 5, 10));
+  // controlPoints.push_back(Vec3f(-10, 5, 0));
+  // controlPoints.push_back(Vec3f(-10, 0, 0));
+  // controlPoints.push_back(Vec3f(-10, -5, 0));
+  // controlPoints.push_back(Vec3f(-5, -5, 0));
 
-  // C(u) is your parametric curve
-  // u -> [0,1]
   curve.setCurve(controlPoints);
 
   std::vector<Vec3f> curvePoints;
@@ -374,11 +376,18 @@ int main(int argc, char **argv) {
   std::cout << "GL Version: :" << glGetString(GL_VERSION) << std::endl;
   std::cout << GL_ERROR() << std::endl;
 
+  // Read in points from file
+  std::string file( "track1.txt" );
+
+	loadVec3fFromFile(controlPoints, file);
+
+	for( auto & v : controlPoints )
+	{
+		std::cout << v << std::endl;
+	}
+
   // Initialize all the geometry, and load it once to the GPU
   init(); // our own initialize stuff func
-
-  // Instantiate objects
- // curve = new ParametricCurve::ParametricCurve();
 
   float deltaS = 0.f; // this deltaS is the distance we want to travel along the curve
   float deltaT = 0.1f; // change in time
@@ -387,11 +396,6 @@ int main(int argc, char **argv) {
 
   while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
          !glfwWindowShouldClose(window)) {
-
-  //         for (int i= 0; i < 100; i++) {
-  //           Vec3f test = curve.getPosition(i);
-  //         }
-
 
     if (g_play) {
       v = curve.getVelocity(currentPos.y());
