@@ -139,12 +139,17 @@ void ParametricCurve::setHighestPoint() {
 		i = i + 0.001f;
 	}
 
-	printf("highestpoint is : %f\n", highestPoint);
+//	printf("highestpoint is : %f\n", highestPoint);
 }
 
-float ParametricCurve::getVelocity(float currHeight) {
+float ParametricCurve::getVelocity(float prevVel, float currHeight) {
 	float v = 0.f;
+	float vMin = 2.f;
 	v = sqrt(2.f * 9.81f * (highestPoint - currHeight));
+
+	if (v < prevVel) { // lifting stage
+			v = vMin;
+	}
 	printf("currHeight: %f\n", currHeight);
 	printf("highestPoint: %f\n", highestPoint);
 
@@ -164,7 +169,7 @@ Vec3f ParametricCurve::getPosition(float distance) {
 	// printf("newIndex %d\n", newIndex);
 	// float withinIndex = (distance - newIndex) / deltaS;
 	// printf("withinIndex %d\n", withinIndex);
-	printf("distance before %f\n", distance);
+//	printf("distance before %f\n", distance);
 	distance = modDist(distance);
 	printf("distance %f\n", distance);
 
@@ -174,21 +179,19 @@ Vec3f ParametricCurve::getPosition(float distance) {
 //	printf("newIndexafter floor %f\n", newIndex);
 
 	newIndex = newIndex * deltaS;
-//	printf("newIndexafter delta mult %f\n", newIndex);
+	printf("newIndexafter delta mult %f\n", newIndex);
 
 //	newIndex = newIndex%(N);
 
 //	printf("newIndex %d\n", newIndex);
 	float withinIndex = (distance - newIndex) / deltaS;
-//	printf("withinIndex %f\n", withinIndex);
+	printf("withinIndex %f\n", withinIndex);
 //	printf("final index %d\n", (int)newIndex);
 
 	float newPos = ((1.f - withinIndex) * uValues[(int)newIndex]) +
 								 (withinIndex * uValues[(int)newIndex + 1]);
 //	newPos = modDist(newPos); // to keep it between 0 and 1
-//	printf("newPos %f\n", newPos);
 	printf("newPos %f\n", newPos);
-
 
 
 	return getCurvePoint(newPos);

@@ -377,7 +377,7 @@ int main(int argc, char **argv) {
   std::cout << GL_ERROR() << std::endl;
 
   // Read in points from file
-  std::string file( "track1.txt" );
+  std::string file( "track2.txt" );
 
 	loadVec3fFromFile(controlPoints, file);
 
@@ -392,20 +392,20 @@ int main(int argc, char **argv) {
   float deltS = 0.f; // this deltaS is the distance we want to travel along the curve
   float deltaT = 0.1f; // change in time
   float v = 0.f; // velocity, as determined by physics
-  float vMin = 5.f;
+  float vMin = 2.f;
   Vec3f currentPos = curve.getPosition(deltS);
 
   while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
          !glfwWindowShouldClose(window)) {
 
     if (g_play) {
-      v = curve.getVelocity(currentPos.y());
+      v = curve.getVelocity(v, currentPos.y());
 //  v = 8.f;
-if (v == 0.f)
-  v = 0.1f;
+//if (v == 0.f)
+//  v = 0.1f;
       deltS += v * deltaT;
 //      deltaS = curve.modDist(deltaS);
-      printf(" deltS: %f\n", deltS);
+      printf(" velocity: %f\n", v);
 
       currentPos = curve.getPosition(deltS);
 //      printf(" veloc: %f\n", v);

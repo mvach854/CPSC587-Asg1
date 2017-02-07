@@ -17,7 +17,7 @@ public:
 	ParametricCurve();
 	void setCurve(std::vector<Vec3f> contPoints);
 	Vec3f getCurvePoint(float distAlongTrack);
-	float getVelocity(float currHeight);
+	float getVelocity(float prevVel, float currHeight);
 	Vec3f getPosition(float distance);
 	float modDist(float position);
 
