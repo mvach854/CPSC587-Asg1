@@ -19,7 +19,7 @@ public:
 	Vec3f getCurvePoint(float distAlongTrack);
 	float getVelocity(float prevVel, float currHeight);
 	Vec3f getPosition(float distance);
-	float modDist(float position);
+	float getTotalArcLength();
 
 private:
 	std::vector<Vec3f> initialCurve;
@@ -32,9 +32,10 @@ private:
 	float highestPoint;
 
 	void arcLengthParameterization();
-	float getTotalArcLength();
+	void setTotalArcLength();
 	float bisectionRefinement(float ul, float uh, float deltaS, float currS, Vec3f currPos);
 	void setHighestPoint();
+	float modDist(float position);
 };
 
 #endif // PARAMETRIC_CURVE_H

@@ -390,22 +390,24 @@ int main(int argc, char **argv) {
   init(); // our own initialize stuff func
 
   float deltS = 0.f; // this deltaS is the distance we want to travel along the curve
-  float deltaT = 0.1f; // change in time
+  float deltaT = 0.05f; // change in time
   float v = 0.f; // velocity, as determined by physics
   float vMin = 2.f;
   Vec3f currentPos = curve.getPosition(deltS);
+  float arcLengthOfCurve = curve.getTotalArcLength();
 
   while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
          !glfwWindowShouldClose(window)) {
 
     if (g_play) {
       v = curve.getVelocity(v, currentPos.y());
-//  v = 8.f;
-//if (v == 0.f)
-//  v = 0.1f;
+
+printf("velocity: %f\n", v);
       deltS += v * deltaT;
-//      deltaS = curve.modDist(deltaS);
-      printf(" velocity: %f\n", v);
+      printf("deltS: %f\n", deltS);
+      if (deltS >= arcLengthOfCurve) {
+        deltS = 0.f;
+      }
 
       currentPos = curve.getPosition(deltS);
 //      printf(" veloc: %f\n", v);
