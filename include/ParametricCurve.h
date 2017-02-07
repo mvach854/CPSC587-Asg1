@@ -18,14 +18,16 @@ public:
 	void setCurve(std::vector<Vec3f> contPoints);
 	Vec3f getCurvePoint(float distAlongTrack);
 	float getVelocity(float currHeight);
-	Vec3f getPosition(int deltaS);
+	Vec3f getPosition(float distance);
+	float modDist(float position);
 
 private:
 	std::vector<Vec3f> initialCurve;
 	float numBezierCurves;
 	int N;
-	float uValues[100]; // 100 represents N values that the curve will be split into
+	float uValues[150]; // 150 represents N values that the curve will be split into
 	float totalArcLength;
+	float deltaS; // arc length subdivision size
 	float deltaU;
 	float highestPoint;
 

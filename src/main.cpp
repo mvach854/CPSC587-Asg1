@@ -321,7 +321,7 @@ void init() {
   glEnable(GL_DEPTH_TEST);
   glPointSize(50);
 
-  camera = Camera(Vec3f{0, 0, 5}, Vec3f{0, 0, -1}, Vec3f{0, 1, 0});
+  camera = Camera(Vec3f{0, 0, 20}, Vec3f{0, 0, -1}, Vec3f{0, 1, 0});
 
   // SETUP SHADERS, BUFFERS, VAOs
 
@@ -389,21 +389,27 @@ int main(int argc, char **argv) {
   // Initialize all the geometry, and load it once to the GPU
   init(); // our own initialize stuff func
 
-  float deltaS = 0.f; // this deltaS is the distance we want to travel along the curve
+  float deltS = 0.f; // this deltaS is the distance we want to travel along the curve
   float deltaT = 0.1f; // change in time
   float v = 0.f; // velocity, as determined by physics
-  Vec3f currentPos = curve.getPosition(deltaS);
+  float vMin = 5.f;
+  Vec3f currentPos = curve.getPosition(deltS);
 
   while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
          !glfwWindowShouldClose(window)) {
 
     if (g_play) {
       v = curve.getVelocity(currentPos.y());
-      deltaS += v * deltaT;
-      currentPos = curve.getPosition(deltaS);
-      printf(" veloc: %f\n", v);
-      printf(" deltaS: %f\n", deltaS);
-      std::cout << "curr pos: " << currentPos << std::endl;
+//  v = 8.f;
+if (v == 0.f)
+  v = 0.1f;
+      deltS += v * deltaT;
+//      deltaS = curve.modDist(deltaS);
+      printf(" deltS: %f\n", deltS);
+
+      currentPos = curve.getPosition(deltS);
+//      printf(" veloc: %f\n", v);
+//      std::cout << "curr pos: " << currentPos << std::endl;
       animateQuad(currentPos);
     }
 
