@@ -41,24 +41,11 @@ Vec3f ParametricCurve::getCurvePoint(float distAlongTrack) {
 	Vec3f P2 = initialCurve[firstPoint + 1];
 	Vec3f P3 = initialCurve[firstPoint + 2];
 	Vec3f P4 = initialCurve[(firstPoint + 3)%initialCurve.size()];
-/*	printf("distAlongTrack = %f\n", distAlongTrack);
-	printf("bezierSeg** = %f\n", bezierSeg);
-	printf("startOfSeg** = %f\n", startOfSeg);
-	printf("distBez** = %f\n", distBez);
-	int i = (firstPoint + 3)%initialCurve.size();
-	printf("first point** = %d\n", firstPoint);
-	printf("last point** = %d\n", i);*/
+
 	Vec3f output = (pow((1 - distBez), 3) * P1) +
 								 (3 * pow((1 - distBez), 2) * distBez * P2) +
 								 (3 * (1 - distBez) * pow(distBez, 2) * P3) +
 								 (pow(distBez, 3) * P4);
-
-/* 	std::cout << "P1: " << P1 << "\n";
-	std::cout << "P2: " << P2 << "\n";
-	std::cout << "P3: " << P3 << "\n";
-	std::cout << "P4: " << P4 << "\n";
-
-	std::cout << "output point: " << output << "\n";*/
 
 	return output;
 }
@@ -67,17 +54,12 @@ void ParametricCurve::setTotalArcLength() {
 	float L = 0.f; // Total arc length
 	float u = 0.f;
 	Vec3f p = getCurvePoint(u); // Point holder
-//	printf("point = %f\n", p);
+
 	while (u <= 1.f) {
 		u = u + deltaU;
-//		printf("u = %f\n", u);
-//		printf("Lb = %f\n", L);
-	//	std::cout << getCurvePoint(u) << "\n";
+
 		L = L + p.distance(getCurvePoint(u));
-//		printf("La = %f\n", L);
-//		printf("distance = %f\n", p.distance(getCurvePoint(u)));
-//		printf("current L = %d\n", L);
-	//	printf("new point = %f\n", p);
+
 		p = getCurvePoint(u);
 	}
 	totalArcLength = L;
@@ -95,7 +77,7 @@ void ParametricCurve::arcLengthParameterization() {
 	float ul = 0;
 	Vec3f currPos;
 
-	while (uh <= 1) {
+	while (uh <= 1.f) {
 		currPos = getCurvePoint(uh);
 		uh = uh + deltaU;
 		if ((currS + currPos.distance(getCurvePoint(uh))) > deltaS) {
@@ -103,6 +85,7 @@ void ParametricCurve::arcLengthParameterization() {
 			uValues[i] = bisectionRefinement(ul, uh, deltaS, currS, currPos);
 		  uh = uValues[i];
 			i = i + 1;
+
 			currS = 0;
 		}
 		else {
@@ -143,8 +126,6 @@ void ParametricCurve::setHighestPoint() {
 		}
 		i = i + 0.001f;
 	}
-
-//	printf("highestpoint is : %f\n", highestPoint);
 }
 
 float ParametricCurve::getVelocity(float prevVel, float currHeight) {
@@ -152,73 +133,30 @@ float ParametricCurve::getVelocity(float prevVel, float currHeight) {
 	float vMin = 2.f;
 	v = sqrt(2.f * 9.81f * (highestPoint - currHeight));
 
-	if (v < prevVel) { // lifting stage
+	if (v < prevVel) { // lifting stage.. change
 			v = vMin;
 	}
-	printf("currHeight: %f\n", currHeight);
-	printf("highestPoint: %f\n", highestPoint);
-
 	return v;
 }
 
 Vec3f ParametricCurve::getPosition(float distance) {
-	// int newIndex = floor(distance/deltaS);
-	// printf("newIndexafter floor %d\n", newIndex);
-	//
-	// newIndex = newIndex * deltaS;
-	// printf("newIndexafter delta mult %d\n", newIndex);
-	//
-	// newIndex = newIndex%(N);
-	//
-	// distance = fmod(distance, 100);
-	// printf("newIndex %d\n", newIndex);
-	// float withinIndex = (distance - newIndex) / deltaS;
-	// printf("withinIndex %d\n", withinIndex);
-//	printf("distance before %f\n", distance);
-//	distance = modDist(distance);
-//	printf("distance %f\n", distance);
-
-//	printf("deltaS before floor %f\n", deltaS);
-
 	int newIndex = floor(distance/deltaS);
-//	printf("newIndexafter floor %f\n", newIndex);
 	newIndex = newIndex % (N-1);
-//	newIndex = newIndex * deltaS;
-	printf("newIndexafter after floor %d\n", newIndex);
 
-//	newIndex = newIndex%(N);
-//printf("moddist is %f\n", modDist(distance));
-//	printf("newIndex %d\n", newIndex);
 	float withinIndex = modDist((distance - (((float)newIndex)*deltaS)) / deltaS);
-	printf("withinIndex %f\n", withinIndex);
-	printf("lower uvalue %f\n", uValues[newIndex]);
-	printf("upper uvalue %f\n", uValues[newIndex+1]);
-
-	printf("u value at 149 %f\n", uValues[149]);
-
-//	printf("final index %d\n", (int)newIndex);
 
 	float newPos = ((1.f - withinIndex) * uValues[(int)newIndex]) +
 								 (withinIndex * uValues[(int)newIndex + 1]);
-//	newPos = modDist(newPos); // to keep it between 0 and 1
-	printf("newPos %f\n", newPos);
-
 
 	return getCurvePoint(newPos);
-//std:: cout << "position along curve " << deltaS << " : " << uValues[deltaS] << std::endl;
-//	std::cout << "test position: " << getCurvePoint(uValues[deltaS]) << std::endl;
-//	return getCurvePoint(uValues[deltaS%N]);
 }
 
-// Remove
 float ParametricCurve::modDist(float position) {
 	float original = position;
 	float remain = position;
 	if (position > (N-1)) {
 		int division = position / (N-1);
 		remain = (original - (division * (N-1)));
-		printf("division is  %d\n", division);
-
 	}
 	return remain;
 }

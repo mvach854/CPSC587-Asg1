@@ -100,6 +100,7 @@ void init();
 void generateIDs();
 void deleteIDs();
 void setupVAO();
+void loadTrackToGPU();
 void loadQuadGeometryToGPU();
 void reloadProjectionMatrix();
 void loadModelViewMatrix();
@@ -186,23 +187,7 @@ void loadQuadGeometryToGPU() {
 }
 
 // Edited by: Manorie Vachon
-void loadLineGeometryToGPU() {
-  // Just basic layout of floats, for a quad
-  // 3 floats per vertex, 4 vertices
-  //std::vector<Vec3f> controlPoints;
-  // controlPoints.push_back(Vec3f(0, 0, 0));
-  // controlPoints.push_back(Vec3f(5, 5, 0));
-  // controlPoints.push_back(Vec3f(10, 5, 0));
-  // controlPoints.push_back(Vec3f(10, 0, 0));
-  // controlPoints.push_back(Vec3f(10, -5, 0));
-  // controlPoints.push_back(Vec3f(5, -5, 0));
-  // controlPoints.push_back(Vec3f(0, 0, 5));
-  // controlPoints.push_back(Vec3f(-5, 5, 10));
-  // controlPoints.push_back(Vec3f(-10, 5, 0));
-  // controlPoints.push_back(Vec3f(-10, 0, 0));
-  // controlPoints.push_back(Vec3f(-10, -5, 0));
-  // controlPoints.push_back(Vec3f(-5, -5, 0));
-
+void loadTrackToGPU() {
   curve.setCurve(controlPoints);
 
   std::vector<Vec3f> curvePoints;
@@ -321,17 +306,19 @@ void init() {
   glEnable(GL_DEPTH_TEST);
   glPointSize(50);
 
-  camera = Camera(Vec3f{0, 0, 20}, Vec3f{0, 0, -1}, Vec3f{0, 1, 0});
+  camera = Camera(Vec3f{0, 0, 40}, Vec3f{0, 0, -1}, Vec3f{0, 1, 0});
 
   // SETUP SHADERS, BUFFERS, VAOs
 
   generateIDs();
   setupVAO();
   loadQuadGeometryToGPU();
-  loadLineGeometryToGPU();
+  loadTrackToGPU();
 
   loadModelViewMatrix();
   reloadProjectionMatrix();
+  M = IdentityMatrix();
+  M = TranslateMatrix(2.f, 2.f, 0.f) * M;
   setupModelViewProjectionTransform();
   reloadMVPUniform();
 }
@@ -350,7 +337,7 @@ int main(int argc, char **argv) {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
   window =
-      glfwCreateWindow(WIN_WIDTH, WIN_HEIGHT, "CPSC 587/687 Tut03", NULL, NULL);
+      glfwCreateWindow(WIN_WIDTH, WIN_HEIGHT, "CPSC 587 Assignment 1", NULL, NULL);
   if (!window) {
     glfwTerminate();
     exit(EXIT_FAILURE);
@@ -367,7 +354,7 @@ int main(int argc, char **argv) {
 
   glfwGetFramebufferSize(window, &WIN_WIDTH, &WIN_HEIGHT);
 
-  // Initialize glad
+  // initialize glad
   if (!gladLoadGL()) {
     std::cerr << "Failed to initialise GLAD" << std::endl;
     return -1;
@@ -386,13 +373,12 @@ int main(int argc, char **argv) {
 		std::cout << v << std::endl;
 	}
 
-  // Initialize all the geometry, and load it once to the GPU
+  // ialize all the geometry, and load it once to the GPU
   init(); // our own initialize stuff func
 
   float deltS = 0.f; // this deltaS is the distance we want to travel along the curve
   float deltaT = 0.05f; // change in time
   float v = 0.f; // velocity, as determined by physics
-  float vMin = 2.f;
   Vec3f currentPos = curve.getPosition(deltS);
   float arcLengthOfCurve = curve.getTotalArcLength();
 
@@ -402,11 +388,10 @@ int main(int argc, char **argv) {
     if (g_play) {
       v = curve.getVelocity(v, currentPos.y());
 
-printf("velocity: %f\n", v);
       deltS += v * deltaT;
-      printf("deltS: %f\n", deltS);
+
       if (deltS >= arcLengthOfCurve) {
-        deltS = 0.f;
+        deltS = deltS - arcLengthOfCurve;
       }
 
       currentPos = curve.getPosition(deltS);
