@@ -116,12 +116,19 @@ float ParametricCurve::bisectionRefinement(float ul, float uh, float deltaS, flo
 void ParametricCurve::setHighestPoint() {
 	float i = 0.f;
 	highestPoint = getCurvePoint(i).y();
+	printf("highest first point: %f\n", highestPoint);
+	printf("point y: %f\n", getCurvePoint(i).y());
+
 	while (i <= 1.f) {
 		if (getCurvePoint(i).y() > highestPoint) {
 			highestPoint = getCurvePoint(i).y();
+			printf("high each time: %f\n", highestPoint);
+
 		}
-		i = i + 0.001f;
+		i = i + deltaU;
 	}
+	printf("heighest point: %f\n", highestPoint);
+
 }
 
 float ParametricCurve::getVelocity(float s) {
@@ -129,7 +136,9 @@ float ParametricCurve::getVelocity(float s) {
 	float vMin = 2.f;
 	Vec3f currPos = getPosition(s);
 	v = sqrt(2.f * 9.81f * (highestPoint - currPos.y()));
-	if (s >= 0.f && s <= 20.45f) { // lifting stage
+	printf("curr y: %f\n", currPos.y());
+	printf("v: %f\n", v);
+	if (s >= 0.f && s <= 21.05f) { // lifting stage
 			v = vMin;
 	}
 	return v;
@@ -138,13 +147,14 @@ float ParametricCurve::getVelocity(float s) {
 Vec3f ParametricCurve::getPosition(float distance) {
 	int newIndex = floor(distance/deltaS);
 	newIndex = newIndex % (N-1);
-
+	printf("newindex: %d\n", newIndex);
+printf("distance: %f\n", distance);
 	float withinIndex = modDist((distance - (((float)newIndex)*deltaS)) / deltaS);
 
 	float newPos = ((1.f - withinIndex) * uValues[(int)newIndex]) +
 								 (withinIndex * uValues[(int)newIndex + 1]);
 
- 	printf("deltaS: %f\n", deltaS);
+ 	//printf("deltaS: %f\n", deltaS);
 	printf("within: %f\n", withinIndex);
 	printf("newPos: %f\n", newPos);
 

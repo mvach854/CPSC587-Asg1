@@ -140,8 +140,8 @@ void displayFunc() {
   // Use VAO that holds buffer bindings
   // and attribute config of buffers
   glBindVertexArray(vaoID);
-  // Draw Quads, start at vertex 0, draw 4 of them (for a quad)
-  glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+  // Draw Quads, start at vertex 0, draw 20 of them (for a quad with 5 sides)
+  glDrawArrays(GL_TRIANGLE_STRIP, 0, 20);
 
   // ==== DRAW LINE ===== //
   MVP = P * V * line_M;
@@ -179,9 +179,29 @@ void loadQuadGeometryToGPU() {
   verts.push_back(Vec3f(1, -1, 0));
   verts.push_back(Vec3f(1, 1, 0));
 
+  verts.push_back(Vec3f(1, 1, 0));
+  verts.push_back(Vec3f(1, 0, 0));
+  verts.push_back(Vec3f(1, 1, 1));
+  verts.push_back(Vec3f(1, 0, 1));
+
+  verts.push_back(Vec3f(-1, 1, 0));
+  verts.push_back(Vec3f(-1, 1, 1));
+  verts.push_back(Vec3f(1, -1, 0));
+  verts.push_back(Vec3f(1, -1, 1));
+
+  verts.push_back(Vec3f(-1, -1, 1));
+  verts.push_back(Vec3f(-1, 1, 1));
+  verts.push_back(Vec3f(1, 1, 1));
+  verts.push_back(Vec3f(1, -1, 1));
+
+  verts.push_back(Vec3f(1, -1, 0));
+  verts.push_back(Vec3f(1, -1, 1));
+  verts.push_back(Vec3f(1, -1, 0));
+  verts.push_back(Vec3f(1, -1, 1));
+
   glBindBuffer(GL_ARRAY_BUFFER, vertBufferID);
   glBufferData(GL_ARRAY_BUFFER,
-               sizeof(Vec3f) * 4, // byte size of Vec3f, 4 of them
+               sizeof(Vec3f) * 20, // byte size of Vec3f, 20 of them
                verts.data(),      // pointer (Vec3f*) to contents of verts
                GL_STATIC_DRAW);   // Usage pattern of GPU buffer
 }
@@ -383,23 +403,23 @@ int main(int argc, char **argv) {
   Vec3f tangent;
   Vec3f acc;
   Vec3f binormal;
-  float arcLengthOfCurve = curve.getTotalArcLength();
 
   while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
          !glfwWindowShouldClose(window)) {
 
     if (g_play) {
-//      tangent = curve.tangent(s);
+      tangent = curve.tangent(s);
       v = curve.getVelocity(s);
-//      acc = ((v*v) * curve.curvature(s)) + Vec3f(0.f, 9.81f, 0.f) +
-  //          (curve.tanAcc(s, deltaT) * curve.tangent(s));
-//      binormal = tangent.crossProduct(acc);
+      acc = ((v*v) * curve.curvature(s)) + Vec3f(0.f, 9.81f, 0.f) +
+            (curve.tanAcc(s, deltaT) * curve.tangent(s));
+      binormal = tangent.crossProduct(acc);
       s += v * deltaT;
 
       s = curve.wrap(s);
 
       currentPos = curve.getPosition(s);
       printf("s is: %f\n", s);
+
 //      printf(" veloc: %f\n", v);
 //      std::cout << "curr pos: " << currentPos << std::endl;
       animateQuad(currentPos);
