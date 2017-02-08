@@ -16,10 +16,6 @@ void ParametricCurve::setCurve(std::vector<Vec3f> contPoints) {
 																					 				// even multiple of 3 which would make a close loop
 	setTotalArcLength();
 	deltaS = totalArcLength/N;
-	printf("arc is: %f\n", totalArcLength);
-	printf("arc n before: %d\n", N);
-
-	printf("deltaS is: %f\n", deltaS);
 	arcLengthParameterization();
 	setHighestPoint();
 }
@@ -128,12 +124,12 @@ void ParametricCurve::setHighestPoint() {
 	}
 }
 
-float ParametricCurve::getVelocity(float prevVel, float currHeight) {
+float ParametricCurve::getVelocity(float s) {
 	float v = 0.f;
 	float vMin = 2.f;
-	v = sqrt(2.f * 9.81f * (highestPoint - currHeight));
-
-	if (v < prevVel) { // lifting stage.. change
+	Vec3f currPos = getPosition(s);
+	v = sqrt(2.f * 9.81f * (highestPoint - currPos.y()));
+	if (s >= 0.f && s <= 20.45f) { // lifting stage
 			v = vMin;
 	}
 	return v;
@@ -148,6 +144,11 @@ Vec3f ParametricCurve::getPosition(float distance) {
 	float newPos = ((1.f - withinIndex) * uValues[(int)newIndex]) +
 								 (withinIndex * uValues[(int)newIndex + 1]);
 
+ 	printf("deltaS: %f\n", deltaS);
+	printf("within: %f\n", withinIndex);
+	printf("newPos: %f\n", newPos);
+
+
 	return getCurvePoint(newPos);
 }
 
@@ -159,4 +160,26 @@ float ParametricCurve::modDist(float position) {
 		remain = (original - (division * (N-1)));
 	}
 	return remain;
+}
+
+float ParametricCurve::wrap(float s) {
+	if (s > totalArcLength) {
+		s = s - totalArcLength;
+	}
+	if (s < 0) {
+		s = s + totalArcLength;
+	}
+	return s;
+}
+
+Vec3f ParametricCurve::tangent(float s) {
+	return (getPosition(s + deltaU) - getPosition(s)) / deltaU;
+}
+
+Vec3f ParametricCurve::curvature(float s) {
+	return (getPosition(s + deltaU) - 2*getPosition(s) + getPosition(s - deltaU)) / (deltaU*deltaU);
+}
+
+float ParametricCurve::tanAcc(float s, float dt) {
+	return (getVelocity(s + getVelocity(s)*dt) - getVelocity(s)) / dt;
 }

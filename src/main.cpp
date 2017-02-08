@@ -376,25 +376,30 @@ int main(int argc, char **argv) {
   // ialize all the geometry, and load it once to the GPU
   init(); // our own initialize stuff func
 
-  float deltS = 0.f; // this deltaS is the distance we want to travel along the curve
+  float s = 0.f; // this deltaS is the distance we want to travel along the curve
   float deltaT = 0.05f; // change in time
   float v = 0.f; // velocity, as determined by physics
-  Vec3f currentPos = curve.getPosition(deltS);
+  Vec3f currentPos = curve.getPosition(s);
+  Vec3f tangent;
+  Vec3f acc;
+  Vec3f binormal;
   float arcLengthOfCurve = curve.getTotalArcLength();
 
   while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
          !glfwWindowShouldClose(window)) {
 
     if (g_play) {
-      v = curve.getVelocity(v, currentPos.y());
+//      tangent = curve.tangent(s);
+      v = curve.getVelocity(s);
+//      acc = ((v*v) * curve.curvature(s)) + Vec3f(0.f, 9.81f, 0.f) +
+  //          (curve.tanAcc(s, deltaT) * curve.tangent(s));
+//      binormal = tangent.crossProduct(acc);
+      s += v * deltaT;
 
-      deltS += v * deltaT;
+      s = curve.wrap(s);
 
-      if (deltS >= arcLengthOfCurve) {
-        deltS = deltS - arcLengthOfCurve;
-      }
-
-      currentPos = curve.getPosition(deltS);
+      currentPos = curve.getPosition(s);
+      printf("s is: %f\n", s);
 //      printf(" veloc: %f\n", v);
 //      std::cout << "curr pos: " << currentPos << std::endl;
       animateQuad(currentPos);

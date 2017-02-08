@@ -17,9 +17,13 @@ public:
 	ParametricCurve();
 	void setCurve(std::vector<Vec3f> contPoints);
 	Vec3f getCurvePoint(float distAlongTrack);
-	float getVelocity(float prevVel, float currHeight);
+	float getVelocity(float s);
 	Vec3f getPosition(float distance);
 	float getTotalArcLength();
+	float wrap(float s);
+	Vec3f tangent(float s);
+	Vec3f curvature(float s);
+	float tanAcc(float s, float dt);
 
 private:
 	std::vector<Vec3f> initialCurve;
