@@ -45,15 +45,20 @@
 // Drawing Program
 GLuint basicProgramID;
 
-// Data needed for Quad
+// Data needed for Box
 GLuint vaoID;
 GLuint vertBufferID;
 Mat4f M;
 
-// Data needed for Line
+// Data needed for Track
 GLuint line_vaoID;
 GLuint line_vertBufferID;
 Mat4f line_M;
+
+// Data for plane
+GLuint plane_vaoID;
+GLuint plane_vertBufferID;
+Mat4f plane_M;
 
 // Only one camera so only one view and perspective matrix are needed.
 Mat4f V;
@@ -102,6 +107,7 @@ void deleteIDs();
 void setupVAO();
 void loadTrackToGPU();
 void loadQuadGeometryToGPU();
+void loadPlaneGeometryToGPU();
 void reloadProjectionMatrix();
 void loadModelViewMatrix();
 void setupModelViewProjectionTransform();
@@ -153,6 +159,17 @@ void displayFunc() {
   glBindVertexArray(line_vaoID);
   // Draw lines
   glDrawArrays(GL_LINE_LOOP, 0, numPointsParametric); // Number of defined vertices for track
+
+  // ===== DRAW PLANE ====== //
+  MVP = P * V * plane_M;
+  reloadMVPUniform();
+  reloadColorUniform(0, 1, 0);
+
+  // Use VAO that holds buffer bindings
+  // and attribute config of buffers
+  glBindVertexArray(plane_vaoID);
+  // Draw Quads, start at vertex 0, draw 20 of them (for a quad with 5 sides)
+  glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
 void animateQuad(Vec3f position) {
@@ -225,6 +242,20 @@ void loadTrackToGPU() {
                GL_STATIC_DRAW);   // Usage pattern of GPU buffer
 }
 
+void loadPlaneGeometryToGPU() {
+  std::vector<Vec3f> verts;
+  verts.push_back(Vec3f(30, -1, 10));
+  verts.push_back(Vec3f(30, -10, -2));
+  verts.push_back(Vec3f(-60, -1, 10));
+  verts.push_back(Vec3f(-60, -10, -2));
+
+  glBindBuffer(GL_ARRAY_BUFFER, plane_vertBufferID);
+  glBufferData(GL_ARRAY_BUFFER,
+               sizeof(Vec3f) * 4, // byte size of Vec3f, 20 of them
+               verts.data(),      // pointer (Vec3f*) to contents of verts
+               GL_STATIC_DRAW);   // Usage pattern of GPU buffer
+}
+
 void setupVAO() {
   glBindVertexArray(vaoID);
 
@@ -242,6 +273,20 @@ void setupVAO() {
 
   glEnableVertexAttribArray(0); // match layout # in shader
   glBindBuffer(GL_ARRAY_BUFFER, line_vertBufferID);
+  glVertexAttribPointer(0,        // attribute layout # above
+                        3,        // # of components (ie XYZ )
+                        GL_FLOAT, // type of components
+                        GL_FALSE, // need to be normalized?
+                        0,        // stride
+                        (void *)0 // array buffer offset
+                        );
+
+  glBindVertexArray(0); // reset to default
+
+  glBindVertexArray(plane_vaoID);
+
+  glEnableVertexAttribArray(0); // match layout # in shader
+  glBindBuffer(GL_ARRAY_BUFFER, plane_vertBufferID);
   glVertexAttribPointer(0,        // attribute layout # above
                         3,        // # of components (ie XYZ )
                         GL_FLOAT, // type of components
@@ -271,6 +316,7 @@ void reloadProjectionMatrix() {
 void loadModelViewMatrix() {
   M = IdentityMatrix();
   line_M = IdentityMatrix();
+  plane_M = IdentityMatrix();
   // view doesn't change, but if it did you would use this
   V = camera.lookatMatrix();
 }
@@ -311,6 +357,8 @@ void generateIDs() {
   glGenBuffers(1, &vertBufferID);
   glGenVertexArrays(1, &line_vaoID);
   glGenBuffers(1, &line_vertBufferID);
+  glGenVertexArrays(1, &plane_vaoID);
+  glGenBuffers(1, &plane_vertBufferID);
 }
 
 void deleteIDs() {
@@ -320,6 +368,8 @@ void deleteIDs() {
   glDeleteBuffers(1, &vertBufferID);
   glDeleteVertexArrays(1, &line_vaoID);
   glDeleteBuffers(1, &line_vertBufferID);
+  glDeleteVertexArrays(1, &plane_vaoID);
+  glDeleteBuffers(1, &plane_vertBufferID);
 }
 
 void init() {
@@ -334,10 +384,11 @@ void init() {
   setupVAO();
   loadQuadGeometryToGPU();
   loadTrackToGPU();
+  loadPlaneGeometryToGPU();
 
   loadModelViewMatrix();
   reloadProjectionMatrix();
-  M = IdentityMatrix();
+//  M = IdentityMatrix();
   M = TranslateMatrix(2.f, 2.f, 0.f) * M;
   setupModelViewProjectionTransform();
   reloadMVPUniform();
@@ -418,10 +469,7 @@ int main(int argc, char **argv) {
       s = curve.wrap(s);
 
       currentPos = curve.getPosition(s);
-      printf("s is: %f\n", s);
 
-//      printf(" veloc: %f\n", v);
-//      std::cout << "curr pos: " << currentPos << std::endl;
       animateQuad(currentPos);
     }
 
